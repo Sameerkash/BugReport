@@ -3,19 +3,13 @@ MAKE=make
 RM =rm
 
 #targets .
-all: 
-	gcc -o client client.c	
-	gcc -o server server.c
-	gnome-terminal -t server --working-directory=/home/cls/dev/Client-Server -- "./server"
-	sleep 10s 
-	$(MAKE) client_target	
+run: 
+	gcc -o bug bug.c
+	./a.out	
+	
 
-
-#another target for client
-client_target:
-	./client  
-
-
+clean: 
+	$(RM) bugs.txt
 # clean:server client
 # 	$(RM) server
 # 	$(RM) client
