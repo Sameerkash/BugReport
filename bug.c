@@ -24,14 +24,42 @@ struct PW
 	struct bug bugreport;
 };
 
+//helperfucntion to take input from the tereminal, handles memeory allocation dynamically so no need to assign any memory just pass the pointer
+int get_line(char **line)
+{
+	int c, len = 0, maxlen = 1;
+
+	*line = malloc((len + 1) * sizeof **line);
+
+	while ((c = getchar()) && c != '\n' && c != EOF)
+	{
+		if (len == maxlen)
+		{
+			maxlen *= 2;
+			*line = realloc(*line, maxlen * sizeof **line);
+		}
+		(*line)[len++] = c;
+	}
+
+	if (len != 0)
+		*line = realloc(*line, len * sizeof *line);
+
+	/* removes the new line, if present */
+	if ((*line)[len] == '\n' && len != 0)
+		--len;
+	(*line)[len] = '\0';
+
+	return len;
+}
+
 void WriteFile()
 {
 	FILE *outfile;
 
 	struct PW p;
-	char name[20];
-	char type[20];
-	char description[200];
+	char *name;
+	char *type;
+	char *description;
 	enum STATUS status;
 	int o;
 
@@ -39,27 +67,26 @@ void WriteFile()
 	//assigns random id to the bug
 	p.uid = rand();
 	//accepts user name
-	printf("Enter the Name of the user\n");
 
-	scanf("%s", &name);
-	// strtok(name, "\n");
+	printf("Enter the Name of the user\n");
+	get_line(&name);
 	strcpy(p.name, name);
-	// getchar();
+
 	// accepts the type of bug
+
 	printf("Enter the type of the Bug you want to report \n");
-	fgets(type, sizeof(type), stdin);
-	getchar();
+	get_line(&type);
 	strcpy(p.bugreport.type, type);
 	// description of the bug
+
 	printf("Enter the description of the bug\n");
-	fgets(description, sizeof(description), stdin);
-	getchar();
+	get_line(&description);
 	strcpy(p.bugreport.description, description);
+
 	// status of the bug
 	printf("Please select a status for the bug 1 IN_PROCESS, 2 NOT_ASSIGNED, 3 FIXED 4, DELIVERED\n");
-
-	while (getchar() != '\n')
-		scanf("%d", &o);
+	// getchar();
+	scanf("%d", &o);
 
 	// accepts the status of the bug
 	switch (o)
@@ -84,7 +111,7 @@ void WriteFile()
 	outfile = fopen("bugs.txt", "a");
 	fwrite(&p, sizeof(struct PW), 1, outfile);
 	if (fwrite != 0)
-		printf("BUG SUCCESSFULLY REPORTEDy !\n");
+		printf("BUG SUCCESSFULLY REPORTED!\n");
 	else
 		printf("OOPs, something went wrong!!\n");
 	fclose(outfile);
@@ -102,11 +129,11 @@ void readFile()
 		exit(1);
 	}
 	while (fread(&inp, sizeof(struct PW), 1, inf))
-		printf("id: %d \n name: %s \n description: %s \n type: %s \n status: %d \n", inp.uid, inp.name, inp.bugreport.description, inp.bugreport.type, inp.bugreport.status);
+		printf("id: %d \t name: %s \t description: %s \t type: %s \t status: %d \n", inp.uid, inp.name, inp.bugreport.description, inp.bugreport.type, inp.bugreport.status);
 	fclose(inf);
 }
 
-void main()
+int main()
 {
 	printf("WELCOME TO BUG REPORTING PORTAL, PLEASE SELECT AN OPTION\n");
 	printf("1: File a Bug Report\n");
@@ -117,6 +144,7 @@ void main()
 
 	int c;
 	scanf("%d", &c);
+	getchar(); // eat the \n after reading c
 	switch (c)
 	{
 	case 1:
@@ -129,4 +157,16 @@ void main()
 		printf("Invalid choice. Please select one of the above options");
 		break;
 	}
+
+	printf("\nWanna file another bug ? (Y/N): ");
+	char ch;
+	getchar(); // eat up the \n in buffer
+	scanf("%c", &ch);
+	getchar(); // eat the \n after reading the char
+	if (ch == 'Y' || ch == 'y')
+		WriteFile();
+	else
+		main();
+
+	return 0;
 }
